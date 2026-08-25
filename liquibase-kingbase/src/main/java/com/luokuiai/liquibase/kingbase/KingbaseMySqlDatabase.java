@@ -8,6 +8,7 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 
 /**
@@ -84,6 +85,11 @@ public class KingbaseMySqlDatabase extends MySQLDatabase {
     }
 
     @Override
+    public boolean isCaseSensitive() {
+        return false;
+    }
+
+    @Override
     public boolean supports(Class<? extends DatabaseObject> object) {
         if (Schema.class.isAssignableFrom(object)) {
             return true;
@@ -108,6 +114,23 @@ public class KingbaseMySqlDatabase extends MySQLDatabase {
             Class<? extends DatabaseObject> objectType) {
         String corrected = super.correctObjectName(objectName, objectType);
         return corrected == null ? null : corrected.toLowerCase(Locale.ROOT);
+    }
+
+    @Override
+    public String escapeColumnName(String catalogName, String schemaName,
+            String tableName, String columnName) {
+        return super.escapeColumnName(catalogName, schemaName, tableName,
+                correctObjectName(columnName, Column.class));
+    }
+
+    @Override
+    public String escapeColumnName(String catalogName, String schemaName,
+            String tableName, String columnName,
+            boolean quoteNamesThatAreFunctions) {
+        String corrected = quoteNamesThatAreFunctions
+                ? correctObjectName(columnName, Column.class) : columnName;
+        return super.escapeColumnName(catalogName, schemaName, tableName,
+                corrected, quoteNamesThatAreFunctions);
     }
 
 }
