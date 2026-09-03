@@ -1,101 +1,20 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
-    id 'com.vanniktech.maven.publish.base' version '0.37.0'
+    id 'com.vanniktech.maven.publish.base' version '0.37.0' apply false
 }
 
 group = 'com.luokuiai.liquibase'
 version = findProperty('releaseVersion') ?: '1.0.0-SNAPSHOT'
 
 ext {
-    liquibaseVersion = findProperty('liquibaseVersion') ?: '4.33.0'
+    liquibaseVersion = findProperty('liquibaseVersion') ?: '5.0.3'
     testcontainersVersion = '2.0.5'
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-    withSourcesJar()
-    withJavadocJar()
-}
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    compileOnly "org.liquibase:liquibase-core:${liquibaseVersion}"
-
-    testImplementation "org.liquibase:liquibase-core:${liquibaseVersion}"
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
-    testImplementation 'org.mockito:mockito-core:5.20.0'
-    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
-    testRuntimeOnly 'cn.com.kingbase:kingbase8:8.6.0'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-tasks.withType(Javadoc).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-test {
-    useJUnitPlatform {
-        excludeTags 'integration'
+    repositories {
+        mavenCentral()
     }
-}
-
-tasks.register('integrationTest', Test) {
-    description = 'Runs KingbaseES integration tests with Testcontainers.'
-    group = 'verification'
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-
-    useJUnitPlatform {
-        includeTags 'integration'
-    }
-
-    systemProperty 'kingbase.test.image',
-            findProperty('kingbaseTestImage') ?: 'kingbase:v8r6'
-    shouldRunAfter test
-    outputs.upToDateWhen { false }
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-
-            pom {
-                name = 'liquibase-kingbase'
-                description = 'Liquibase Database SPI adapter for KingbaseES compatibility modes'
-                url = 'https://github.com/luokuiai/liquibase-kingbase'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'luokuiai'
-                        name = 'Luokuiai'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/luokuiai/liquibase-kingbase.git'
-                    developerConnection = 'scm:git:ssh://git@github.com/luokuiai/liquibase-kingbase.git'
-                    url = 'https://github.com/luokuiai/liquibase-kingbase'
-                }
-            }
-        }
-    }
-}
-
-mavenPublishing {
-    publishToMavenCentral()
-    signAllPublications()
 }

@@ -1,0 +1,3 @@
+com.luokuiai.liquibase.kingbase.KingbaseMySqlIndexSnapshotGenerator
+com.luokuiai.liquibase.kingbase.KingbaseMySqlTableSnapshotGenerator
+com.luokuiai.liquibase.kingbase.KingbaseMySqlViewSnapshotGenerator

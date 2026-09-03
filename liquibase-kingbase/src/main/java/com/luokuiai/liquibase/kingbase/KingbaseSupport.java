@@ -1,5 +1,9 @@
 package com.luokuiai.liquibase.kingbase;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Locale;
 
 import liquibase.database.DatabaseConnection;
@@ -28,21 +32,39 @@ final class KingbaseSupport {
                 && url.toLowerCase(Locale.ROOT).startsWith(JDBC_URL_PREFIX);
     }
 
-    static boolean isPostgresMode() {
+    static boolean isPostgresMode(DatabaseConnection connection) {
         String mode = configuredMode();
-        return mode.isEmpty()
-                || "pg".equals(mode)
+        if (!mode.isEmpty()) {
+            return "pg".equals(mode)
                 || "postgres".equals(mode)
                 || "postgresql".equals(mode);
+        }
+        return !"mysql".equals(connectionMode(connection));
     }
 
-    static boolean isMySqlMode() {
+    static boolean isMySqlMode(DatabaseConnection connection) {
         String mode = configuredMode();
-        return "mysql".equals(mode) || "mariadb".equals(mode);
+        if (!mode.isEmpty()) {
+            return "mysql".equals(mode) || "mariadb".equals(mode);
+        }
+        return "mysql".equals(connectionMode(connection));
     }
 
     private static String configuredMode() {
         return normalize(System.getProperty(COMPAT_MODE_PROPERTY));
+    }
+
+    private static String connectionMode(DatabaseConnection connection) {
+        Connection jdbcConnection = connection.getUnderlyingConnection();
+        if (jdbcConnection == null) {
+            return "";
+        }
+        try (Statement statement = jdbcConnection.createStatement();
+                ResultSet results = statement.executeQuery("show database_mode")) {
+            return results.next() ? normalize(results.getString(1)) : "";
+        } catch (SQLException exception) {
+            return "";
+        }
     }
 
     private static String normalize(String value) {

@@ -1,0 +1,89 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.vanniktech.maven.publish.base'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+    withJavadocJar()
+}
+
+dependencies {
+    compileOnly "org.liquibase:liquibase-core:${rootProject.ext.liquibaseVersion}"
+
+    testImplementation "org.liquibase:liquibase-core:${rootProject.ext.liquibaseVersion}"
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testImplementation 'org.mockito:mockito-core:5.20.0'
+    testImplementation "org.testcontainers:testcontainers:${rootProject.ext.testcontainersVersion}"
+    testRuntimeOnly 'cn.com.kingbase:kingbase8:8.6.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+test {
+    useJUnitPlatform {
+        excludeTags 'integration'
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs KingbaseES integration tests with Testcontainers.'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+
+    systemProperty 'kingbase.test.image',
+            findProperty('kingbaseTestImage') ?: 'kingbase:v8r6'
+    shouldRunAfter test
+    outputs.upToDateWhen { false }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom {
+                name = 'liquibase-kingbase'
+                description = 'Liquibase Database SPI adapter for KingbaseES compatibility modes'
+                url = 'https://github.com/lorkuiai/liquibase-adapters'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'luokuiai'
+                        name = 'Luokuiai'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/lorkuiai/liquibase-adapters.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/lorkuiai/liquibase-adapters.git'
+                    url = 'https://github.com/lorkuiai/liquibase-adapters'
+                }
+            }
+        }
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+}

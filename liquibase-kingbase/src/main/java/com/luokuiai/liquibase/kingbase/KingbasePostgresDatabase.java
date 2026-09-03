@@ -16,8 +16,8 @@ public class KingbasePostgresDatabase extends PostgresDatabase {
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection connection)
             throws DatabaseException {
-        return KingbaseSupport.isPostgresMode()
-                && KingbaseSupport.isKingbaseConnection(connection);
+        return KingbaseSupport.isKingbaseConnection(connection)
+                && KingbaseSupport.isPostgresMode(connection);
     }
 
     @Override

@@ -1,1 +1,3 @@
-rootProject.name = 'liquibase-kingbase'
+rootProject.name = 'liquibase-adapters'
+
+include 'liquibase-kingbase'

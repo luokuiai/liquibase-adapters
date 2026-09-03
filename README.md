@@ -1,6 +1,11 @@
-# liquibase-kingbase
+# liquibase-adapters
 
-Liquibase `Database` SPI adapter for KingbaseES.
+Liquibase `Database` SPI adapters for databases that are not supported by
+Liquibase core.
+
+## KingbaseES
+
+The `liquibase-kingbase` module adds KingbaseES support.
 
 This project is intentionally thin. It lets Liquibase recognize
 `jdbc:kingbase8:` URLs and `com.kingbase8.Driver`, then reuses Liquibase's
@@ -20,10 +25,10 @@ liquibase \
   update
 ```
 
-MySQL mode must be selected explicitly:
+The adapter detects KingbaseES V8 MySQL mode from `SHOW database_mode`:
 
 ```bash
-JAVA_OPTS="-Dliquibase.kingbase.compatMode=mysql" liquibase \
+liquibase \
   --classpath=liquibase-kingbase.jar:kingbase8.jar \
   --url=jdbc:kingbase8://localhost:54321/test \
   --username=system \
@@ -31,6 +36,9 @@ JAVA_OPTS="-Dliquibase.kingbase.compatMode=mysql" liquibase \
   --changelog-file=db.changelog.yaml \
   update
 ```
+
+Set `-Dliquibase.kingbase.compatMode=mysql` to override automatic detection
+when a connection does not expose `database_mode`.
 
 You can also bypass auto-detection with Liquibase's `databaseClass` setting:
 
@@ -42,7 +50,20 @@ liquibase \
 
 ## Spring Boot
 
-Add this jar and the Kingbase JDBC driver to the application classpath.
+Add the adapter and the Kingbase JDBC driver to the application classpath. Use
+the latest release version in production. Snapshot builds also require the
+Central Portal snapshot repository.
+
+```groovy
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.luokuiai.liquibase:liquibase-kingbase:<version>'
+    runtimeOnly 'cn.com.kingbase:kingbase8:8.6.0'
+}
+```
 
 Default PostgreSQL compatibility mode:
 
@@ -52,7 +73,7 @@ spring.datasource.url=jdbc:kingbase8://localhost:54321/test
 spring.liquibase.change-log=classpath:/db/changelog/db.changelog-master.yaml
 ```
 
-MySQL compatibility mode:
+Explicit MySQL compatibility-mode override, only when automatic detection is unavailable:
 
 ```bash
 java -Dliquibase.kingbase.compatMode=mysql -jar app.jar
@@ -64,6 +85,59 @@ For the first production version, prefer explicit SQL changesets and explicit
 rollback blocks. Liquibase's structured change types are inherited from the
 PostgreSQL/MySQL implementations and should be validated against your KingbaseES
 compatibility mode before broad use.
+
+When one application supports both KingbaseES compatibility modes, organize
+changelogs by compatibility mode. Directories are for maintainability; the
+`dbms` attribute determines which changesets Liquibase executes.
+
+```text
+src/main/resources/db/changelog/
+  db.changelog-master.yaml
+  common/
+    001-create-user.yaml
+  kingbase-pg/
+    010-postgres-mode.yaml
+  kingbase-mysql/
+    010-mysql-mode.yaml
+```
+
+The master changelog includes every directory:
+
+```yaml
+databaseChangeLog:
+  - includeAll:
+      path: db/changelog/common
+  - includeAll:
+      path: db/changelog/kingbase-pg
+  - includeAll:
+      path: db/changelog/kingbase-mysql
+```
+
+Put SQL that works in both modes in `common` without a `dbms` value. For
+mode-specific SQL, use `kingbase` for the default PostgreSQL-compatible mode
+and `kingbase-mysql` when `liquibase.kingbase.compatMode=mysql` is set:
+
+```yaml
+databaseChangeLog:
+  - changeSet:
+      id: pg-010-add-index
+      author: team
+      dbms: kingbase
+      changes:
+        - sql:
+            sql: create index idx_user_name on sys_user(username)
+```
+
+```yaml
+databaseChangeLog:
+  - changeSet:
+      id: mysql-010-add-index
+      author: team
+      dbms: kingbase-mysql
+      changes:
+        - sql:
+            sql: create index idx_user_name on sys_user(username)
+```
 
 ```yaml
 databaseChangeLog:
@@ -85,13 +159,14 @@ databaseChangeLog:
 ## Build
 
 ```bash
-./gradlew test
+./gradlew :liquibase-kingbase:test
 ```
 
-The default Liquibase compile target is `4.33.0`. To verify another version:
+This adapter requires Liquibase 5.x and currently compiles against `5.0.3`.
+To verify another Liquibase 5.x version:
 
 ```bash
-./gradlew test -PliquibaseVersion=5.0.3
+./gradlew :liquibase-kingbase:test -PliquibaseVersion=5.0.3
 ```
 
 KingbaseES integration tests use Testcontainers and the local
@@ -99,11 +174,12 @@ KingbaseES integration tests use Testcontainers and the local
 containers, run a Liquibase update, and verify rollback:
 
 ```bash
-./gradlew integrationTest
+./gradlew :liquibase-kingbase:integrationTest
 ```
 
 Use another image name when required:
 
 ```bash
-./gradlew integrationTest -PkingbaseTestImage=registry/kingbase:v8r6
+./gradlew :liquibase-kingbase:integrationTest \
+  -PkingbaseTestImage=registry/kingbase:v8r6
 ```

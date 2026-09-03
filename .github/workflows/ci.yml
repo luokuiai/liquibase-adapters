@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  push:
   pull_request:
   workflow_dispatch:
 
@@ -14,14 +13,8 @@ concurrency:
 
 jobs:
   unit-tests:
-    name: Liquibase ${{ matrix.liquibase-version }}
+    name: Test
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        liquibase-version:
-          - 4.33.0
-          - 5.0.3
 
     steps:
       - name: Checkout sources
@@ -37,4 +30,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Run unit tests
-        run: ./gradlew test -PliquibaseVersion=${{ matrix.liquibase-version }} --no-daemon
+        run: ./gradlew :liquibase-kingbase:test --no-daemon
