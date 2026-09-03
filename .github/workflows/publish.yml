@@ -56,6 +56,6 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         run: ./gradlew :liquibase-kingbase:publishToMavenCentral -PreleaseVersion="$PUBLISH_VERSION" --no-daemon
 
-      - name: Publish release
+      - name: Upload release
         if: github.ref_type == 'tag'
-        run: ./gradlew :liquibase-kingbase:publishAndReleaseToMavenCentral -PreleaseVersion="$PUBLISH_VERSION" --no-daemon
+        run: ./gradlew :liquibase-kingbase:publishToMavenCentral -PreleaseVersion="$PUBLISH_VERSION" --no-daemon
