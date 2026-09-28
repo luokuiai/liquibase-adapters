@@ -69,7 +69,15 @@ class KingbaseContainerIntegrationTest {
                 try (Liquibase liquibase = new Liquibase(CHANGELOG,
                         new ClassLoaderResourceAccessor(), database)) {
                     liquibase.update(new Contexts(), new LabelExpression());
-                    assertEquals(1, probeRowCount(connection));
+                    assertEquals(2, probeRowCount(connection));
+                    int expectedModeId = "mysql".equals(databaseMode) ? 3 : 2;
+                    int skippedModeId = "mysql".equals(databaseMode) ? 2 : 3;
+                    assertEquals(1, queryForInt(connection,
+                            "select count(*) from lb_kingbase_probe where id = "
+                                    + expectedModeId));
+                    assertEquals(0, queryForInt(connection,
+                            "select count(*) from lb_kingbase_probe where id = "
+                                    + skippedModeId));
                     if (expectedAdapter == KingbaseMySqlDatabase.class) {
                         assertEquals(1, queryForInt(connection,
                                 "select count(*) from pg_catalog.pg_indexes "
@@ -89,7 +97,7 @@ class KingbaseContainerIntegrationTest {
                         verifyIndexSnapshot(database);
                     }
 
-                    liquibase.rollback(1, new Contexts(), new LabelExpression());
+                    liquibase.rollback(2, new Contexts(), new LabelExpression());
                     assertThrows(SQLException.class,
                             () -> probeRowCount(connection));
                 }
