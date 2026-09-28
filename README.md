@@ -77,9 +77,10 @@ compatibility mode before broad use.
 
 Both compatibility modes expose the `kingbase` short name, so
 `dbms: kingbase` applies to both. When SQL differs by mode, keep one master
-changelog and organize files under `common/`, `kingbase-pg/`, and
-`kingbase-mysql/`. Apply the compatibility-mode filter once on the parent
-directory:
+changelog and organize files under `common/`, shared dialect directories such
+as `postgresql/` and `mysql/`, and Kingbase-only directories such as
+`kingbase-pg/` and `kingbase-mysql/`. Apply the compatibility-mode filter once
+on the parent directory:
 
 ```yaml
 databaseChangeLog:
@@ -88,9 +89,12 @@ databaseChangeLog:
       filter: com.luokuiai.liquibase.kingbase.CompatModeFilter
 ```
 
-The filter always includes `common/` and uses
-`liquibase.kingbase.compatMode` to include only the matching mode directory.
-No Liquibase context configuration is required.
+The filter only changes behavior for a selected Kingbase adapter. PostgreSQL
+mode includes `postgresql/` and `kingbase-pg/`; MySQL mode includes `mysql/`
+and `kingbase-mysql/`. Other databases and directories are left to Liquibase's
+normal `dbms` filtering. Shared dialect changesets can use
+`dbms: postgresql,kingbase` or `dbms: mysql,kingbase`. No Liquibase context
+configuration is required.
 
 ```yaml
 databaseChangeLog:
