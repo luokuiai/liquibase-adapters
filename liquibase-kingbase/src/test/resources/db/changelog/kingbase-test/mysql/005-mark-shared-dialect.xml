@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="mark-mysql-shared-dialect" author="luokuiai"
+            dbms="mysql,kingbase">
+        <sql>insert into lb_kingbase_probe (id, name) values (5, 'mysql')</sql>
+        <rollback>
+            <sql>delete from lb_kingbase_probe where id = 5</sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -69,15 +69,17 @@ class KingbaseContainerIntegrationTest {
                 try (Liquibase liquibase = new Liquibase(CHANGELOG,
                         new ClassLoaderResourceAccessor(), database)) {
                     liquibase.update(new Contexts(), new LabelExpression());
-                    assertEquals(2, probeRowCount(connection));
-                    int expectedModeId = "mysql".equals(databaseMode) ? 3 : 2;
-                    int skippedModeId = "mysql".equals(databaseMode) ? 2 : 3;
-                    assertEquals(1, queryForInt(connection,
-                            "select count(*) from lb_kingbase_probe where id = "
-                                    + expectedModeId));
+                    assertEquals(3, probeRowCount(connection));
+                    String expectedModeIds = "mysql".equals(databaseMode)
+                            ? "3, 5" : "2, 4";
+                    String skippedModeIds = "mysql".equals(databaseMode)
+                            ? "2, 4" : "3, 5";
+                    assertEquals(2, queryForInt(connection,
+                            "select count(*) from lb_kingbase_probe where id in ("
+                                    + expectedModeIds + ")"));
                     assertEquals(0, queryForInt(connection,
-                            "select count(*) from lb_kingbase_probe where id = "
-                                    + skippedModeId));
+                            "select count(*) from lb_kingbase_probe where id in ("
+                                    + skippedModeIds + ")"));
                     if (expectedAdapter == KingbaseMySqlDatabase.class) {
                         assertEquals(1, queryForInt(connection,
                                 "select count(*) from pg_catalog.pg_indexes "
@@ -97,7 +99,7 @@ class KingbaseContainerIntegrationTest {
                         verifyIndexSnapshot(database);
                     }
 
-                    liquibase.rollback(2, new Contexts(), new LabelExpression());
+                    liquibase.rollback(3, new Contexts(), new LabelExpression());
                     assertThrows(SQLException.class,
                             () -> probeRowCount(connection));
                 }
