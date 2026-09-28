@@ -14,26 +14,26 @@ import liquibase.structure.core.Schema;
 /**
  * KingbaseES adapter for MySQL compatibility mode.
  *
- * <p>KingbaseES V8 reports its compatibility mode through
- * {@code SHOW database_mode}. Set {@code -Dliquibase.kingbase.compatMode=mysql}
- * to override automatic detection when needed.</p>
+ * <p>Set {@code -Dliquibase.kingbase.compatMode=mysql} before Liquibase
+ * initializes to select this implementation.</p>
  */
 public class KingbaseMySqlDatabase extends MySQLDatabase {
     @Override
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return KingbaseSupport.isMySqlMode()
+                ? PRIORITY_DATABASE : PRIORITY_DEFAULT;
     }
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection connection)
             throws DatabaseException {
         return KingbaseSupport.isKingbaseConnection(connection)
-                && KingbaseSupport.isMySqlMode(connection);
+                && KingbaseSupport.isMySqlMode();
     }
 
     @Override
     public String getShortName() {
-        return "kingbase-mysql";
+        return "kingbase";
     }
 
     @Override

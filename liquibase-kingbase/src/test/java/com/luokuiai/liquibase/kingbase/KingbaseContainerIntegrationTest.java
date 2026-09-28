@@ -54,6 +54,9 @@ class KingbaseContainerIntegrationTest {
 
             try (Connection connection = DriverManager.getConnection(
                     jdbcUrl, "kingbase", "dev")) {
+                System.setProperty(KingbaseSupport.COMPAT_MODE_PROPERTY,
+                        databaseMode);
+                DatabaseFactory.reset();
                 Database database = DatabaseFactory.getInstance()
                         .findCorrectDatabaseImplementation(
                                 new JdbcConnection(connection));
@@ -92,6 +95,7 @@ class KingbaseContainerIntegrationTest {
                 }
             } finally {
                 System.clearProperty(KingbaseSupport.COMPAT_MODE_PROPERTY);
+                DatabaseFactory.reset();
             }
         }
     }

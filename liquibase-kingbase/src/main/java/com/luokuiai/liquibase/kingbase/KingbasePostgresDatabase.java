@@ -10,14 +10,15 @@ import liquibase.exception.DatabaseException;
 public class KingbasePostgresDatabase extends PostgresDatabase {
     @Override
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return KingbaseSupport.isPostgresMode()
+                ? PRIORITY_DATABASE : PRIORITY_DEFAULT;
     }
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection connection)
             throws DatabaseException {
         return KingbaseSupport.isKingbaseConnection(connection)
-                && KingbaseSupport.isPostgresMode(connection);
+                && KingbaseSupport.isPostgresMode();
     }
 
     @Override
