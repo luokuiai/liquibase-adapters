@@ -76,8 +76,21 @@ PostgreSQL/MySQL implementations and should be validated against your KingbaseES
 compatibility mode before broad use.
 
 Both compatibility modes expose the `kingbase` short name, so
-`dbms: kingbase` applies to both. Use separate root changelogs or Liquibase
-contexts when SQL differs by compatibility mode.
+`dbms: kingbase` applies to both. When SQL differs by mode, keep one master
+changelog and organize files under `common/`, `kingbase-pg/`, and
+`kingbase-mysql/`. Apply the compatibility-mode filter once on the parent
+directory:
+
+```yaml
+databaseChangeLog:
+  - includeAll:
+      path: db/changelog/changes
+      filter: com.luokuiai.liquibase.kingbase.CompatModeFilter
+```
+
+The filter always includes `common/` and uses
+`liquibase.kingbase.compatMode` to include only the matching mode directory.
+No Liquibase context configuration is required.
 
 ```yaml
 databaseChangeLog:
