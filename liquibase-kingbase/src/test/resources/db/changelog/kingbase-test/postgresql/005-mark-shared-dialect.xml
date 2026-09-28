@@ -4,6 +4,11 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
-    <includeAll path="db/changelog/kingbase-test"
-            filter="com.luokuiai.liquibase.kingbase.CompatModeFilter"/>
+    <changeSet id="mark-postgresql-shared-dialect" author="luokuiai"
+            dbms="postgresql,kingbase">
+        <sql>insert into lb_kingbase_probe (id, name) values (4, 'postgresql')</sql>
+        <rollback>
+            <sql>delete from lb_kingbase_probe where id = 4</sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

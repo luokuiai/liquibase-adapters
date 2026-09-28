@@ -139,17 +139,20 @@ Do not use `git push --tags`.
 ### 7. Verify Maven Central Publishing
 
 The tag triggers `.github/workflows/publish.yml`. The workflow validates the tag
-format, derives the publication version, runs unit tests, and publishes and
-releases the staging repository on Maven Central.
+format, derives the publication version, runs unit tests, and uploads the
+deployment to Maven Central. It does not publish the deployment automatically.
 
 ```bash
 gh run list --workflow publish.yml --limit 3
 gh run watch <RUN_ID> --exit-status
 ```
 
-The release is complete only after the workflow succeeds. If publishing fails,
-do not move or recreate the tag. Rerun the failed workflow for transient
-failures. Use a new version and tag if code or publication metadata must change.
+After the workflow succeeds, open the deployment in Maven Central Portal,
+verify its coordinates and validation status, and click `Publish`. The release
+is complete only after Maven Central reports the deployment as published. If
+uploading fails, do not move or recreate the tag. Rerun the failed workflow for
+transient failures. Use a new version and tag if code or publication metadata
+must change.
 
 ### 8. Delete the Release Branch
 

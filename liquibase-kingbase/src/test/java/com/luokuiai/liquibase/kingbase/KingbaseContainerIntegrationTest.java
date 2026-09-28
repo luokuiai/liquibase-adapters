@@ -54,6 +54,9 @@ class KingbaseContainerIntegrationTest {
 
             try (Connection connection = DriverManager.getConnection(
                     jdbcUrl, "kingbase", "dev")) {
+                System.setProperty(KingbaseSupport.COMPAT_MODE_PROPERTY,
+                        databaseMode);
+                DatabaseFactory.reset();
                 Database database = DatabaseFactory.getInstance()
                         .findCorrectDatabaseImplementation(
                                 new JdbcConnection(connection));
@@ -66,7 +69,17 @@ class KingbaseContainerIntegrationTest {
                 try (Liquibase liquibase = new Liquibase(CHANGELOG,
                         new ClassLoaderResourceAccessor(), database)) {
                     liquibase.update(new Contexts(), new LabelExpression());
-                    assertEquals(1, probeRowCount(connection));
+                    assertEquals(3, probeRowCount(connection));
+                    String expectedModeIds = "mysql".equals(databaseMode)
+                            ? "3, 5" : "2, 4";
+                    String skippedModeIds = "mysql".equals(databaseMode)
+                            ? "2, 4" : "3, 5";
+                    assertEquals(2, queryForInt(connection,
+                            "select count(*) from lb_kingbase_probe where id in ("
+                                    + expectedModeIds + ")"));
+                    assertEquals(0, queryForInt(connection,
+                            "select count(*) from lb_kingbase_probe where id in ("
+                                    + skippedModeIds + ")"));
                     if (expectedAdapter == KingbaseMySqlDatabase.class) {
                         assertEquals(1, queryForInt(connection,
                                 "select count(*) from pg_catalog.pg_indexes "
@@ -86,12 +99,13 @@ class KingbaseContainerIntegrationTest {
                         verifyIndexSnapshot(database);
                     }
 
-                    liquibase.rollback(1, new Contexts(), new LabelExpression());
+                    liquibase.rollback(3, new Contexts(), new LabelExpression());
                     assertThrows(SQLException.class,
                             () -> probeRowCount(connection));
                 }
             } finally {
                 System.clearProperty(KingbaseSupport.COMPAT_MODE_PROPERTY);
+                DatabaseFactory.reset();
             }
         }
     }
