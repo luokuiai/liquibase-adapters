@@ -25,22 +25,11 @@ liquibase \
   update
 ```
 
-The adapter detects KingbaseES V8 MySQL mode from `SHOW database_mode`:
+Set `-Dliquibase.kingbase.compatMode=mysql` before Liquibase initializes to
+select MySQL compatibility mode.
 
-```bash
-liquibase \
-  --classpath=liquibase-kingbase.jar:kingbase8.jar \
-  --url=jdbc:kingbase8://localhost:54321/test \
-  --username=system \
-  --password=secret \
-  --changelog-file=db.changelog.yaml \
-  update
-```
-
-Set `-Dliquibase.kingbase.compatMode=mysql` to override automatic detection
-when a connection does not expose `database_mode`.
-
-You can also bypass auto-detection with Liquibase's `databaseClass` setting:
+You can also select the implementation explicitly with Liquibase's
+`databaseClass` setting:
 
 ```bash
 liquibase \
@@ -73,7 +62,7 @@ spring.datasource.url=jdbc:kingbase8://localhost:54321/test
 spring.liquibase.change-log=classpath:/db/changelog/db.changelog-master.yaml
 ```
 
-Explicit MySQL compatibility-mode override, only when automatic detection is unavailable:
+MySQL compatibility mode:
 
 ```bash
 java -Dliquibase.kingbase.compatMode=mysql -jar app.jar
@@ -86,58 +75,9 @@ rollback blocks. Liquibase's structured change types are inherited from the
 PostgreSQL/MySQL implementations and should be validated against your KingbaseES
 compatibility mode before broad use.
 
-When one application supports both KingbaseES compatibility modes, organize
-changelogs by compatibility mode. Directories are for maintainability; the
-`dbms` attribute determines which changesets Liquibase executes.
-
-```text
-src/main/resources/db/changelog/
-  db.changelog-master.yaml
-  common/
-    001-create-user.yaml
-  kingbase-pg/
-    010-postgres-mode.yaml
-  kingbase-mysql/
-    010-mysql-mode.yaml
-```
-
-The master changelog includes every directory:
-
-```yaml
-databaseChangeLog:
-  - includeAll:
-      path: db/changelog/common
-  - includeAll:
-      path: db/changelog/kingbase-pg
-  - includeAll:
-      path: db/changelog/kingbase-mysql
-```
-
-Put SQL that works in both modes in `common` without a `dbms` value. For
-mode-specific SQL, use `kingbase` for the default PostgreSQL-compatible mode
-and `kingbase-mysql` when `liquibase.kingbase.compatMode=mysql` is set:
-
-```yaml
-databaseChangeLog:
-  - changeSet:
-      id: pg-010-add-index
-      author: team
-      dbms: kingbase
-      changes:
-        - sql:
-            sql: create index idx_user_name on sys_user(username)
-```
-
-```yaml
-databaseChangeLog:
-  - changeSet:
-      id: mysql-010-add-index
-      author: team
-      dbms: kingbase-mysql
-      changes:
-        - sql:
-            sql: create index idx_user_name on sys_user(username)
-```
+Both compatibility modes expose the `kingbase` short name, so
+`dbms: kingbase` applies to both. Use separate root changelogs or Liquibase
+contexts when SQL differs by compatibility mode.
 
 ```yaml
 databaseChangeLog:

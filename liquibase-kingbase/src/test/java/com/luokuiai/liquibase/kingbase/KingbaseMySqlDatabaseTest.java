@@ -24,10 +24,10 @@ class KingbaseMySqlDatabaseTest {
     }
 
     @Test
-    void exposesKingbaseMySqlShortName() {
+    void exposesKingbaseShortName() {
         KingbaseMySqlDatabase database = new KingbaseMySqlDatabase();
 
-        assertEquals("kingbase-mysql", database.getShortName());
+        assertEquals("kingbase", database.getShortName());
     }
 
     @Test
