@@ -50,12 +50,21 @@ jobs:
           fi
 
       - name: Run unit tests
-        run: ./gradlew :liquibase-kingbase:clean :liquibase-kingbase:test -PreleaseVersion="$PUBLISH_VERSION" --no-daemon
+        run: >-
+          ./gradlew :liquibase-kingbase:clean :liquibase-kingbase:test
+          :liquibase-dameng:clean :liquibase-dameng:test
+          -PreleaseVersion="$PUBLISH_VERSION" --no-daemon
 
       - name: Publish snapshot
         if: github.ref == 'refs/heads/develop'
-        run: ./gradlew :liquibase-kingbase:publishToMavenCentral -PreleaseVersion="$PUBLISH_VERSION" --no-daemon
+        run: >-
+          ./gradlew :liquibase-kingbase:publishToMavenCentral
+          :liquibase-dameng:publishToMavenCentral
+          -PreleaseVersion="$PUBLISH_VERSION" --no-daemon
 
       - name: Upload release
         if: github.ref_type == 'tag'
-        run: ./gradlew :liquibase-kingbase:publishToMavenCentral -PreleaseVersion="$PUBLISH_VERSION" --no-daemon
+        run: >-
+          ./gradlew :liquibase-kingbase:publishToMavenCentral
+          :liquibase-dameng:publishToMavenCentral
+          -PreleaseVersion="$PUBLISH_VERSION" --no-daemon

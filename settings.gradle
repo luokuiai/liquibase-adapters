@@ -1,3 +1,4 @@
 rootProject.name = 'liquibase-adapters'
 
 include 'liquibase-kingbase'
+include 'liquibase-dameng'

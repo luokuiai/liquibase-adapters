@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="create-dameng-probe" author="luokuiai" dbms="dameng">
+        <createSequence sequenceName="LB_SEQUENCE" startValue="10" incrementBy="2"/>
+        <createTable tableName="LB_PROBE">
+            <column name="ID" type="bigint" autoIncrement="true"
+                    startWith="10" incrementBy="2">
+                <constraints primaryKey="true" primaryKeyName="PK_LB_PROBE"
+                        nullable="false"/>
+            </column>
+            <column name="NAME" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ENABLED" type="boolean" defaultValueBoolean="true"/>
+            <column name="CREATED_AT" type="datetime"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <createIndex tableName="LB_PROBE" indexName="IX_LB_PROBE_NAME">
+            <column name="NAME"/>
+        </createIndex>
+        <addUniqueConstraint tableName="LB_PROBE" columnNames="NAME,ENABLED"
+                constraintName="UK_LB_PROBE_NAME_ENABLED"/>
+        <createView viewName="LB_PROBE_VIEW">
+            SELECT ID, NAME FROM LB_PROBE
+        </createView>
+        <insert tableName="LB_PROBE">
+            <column name="NAME" value="ready"/>
+        </insert>
+        <rollback>
+            <dropView viewName="LB_PROBE_VIEW"/>
+            <dropTable tableName="LB_PROBE"/>
+            <dropSequence sequenceName="LB_SEQUENCE"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
