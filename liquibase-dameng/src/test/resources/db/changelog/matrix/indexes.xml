@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="indexes-setup" author="test">
+        <createTable tableName="T_INDEX">
+            <column name="ID" type="int"/>
+            <column name="NAME" type="varchar(40)"/>
+        </createTable>
+        <rollback><dropTable tableName="T_INDEX"/></rollback>
+    </changeSet>
+    <changeSet id="indexes-alter" author="test">
+        <createIndex tableName="T_INDEX" indexName="IX_COMPOSITE">
+            <column name="NAME" descending="true"/><column name="ID"/>
+        </createIndex>
+        <createIndex tableName="T_INDEX" indexName="IX_UNIQUE" unique="true"><column name="ID"/></createIndex>
+        <createIndex tableName="T_INDEX" indexName="IX_TEMP"><column name="NAME"/></createIndex>
+        <dropIndex tableName="T_INDEX" indexName="IX_TEMP"/>
+        <rollback>
+            <dropIndex tableName="T_INDEX" indexName="IX_UNIQUE"/>
+            <dropIndex tableName="T_INDEX" indexName="IX_COMPOSITE"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

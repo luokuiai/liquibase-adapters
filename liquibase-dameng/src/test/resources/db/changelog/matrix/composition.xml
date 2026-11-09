@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="composition-setup" author="test">
+        <createTable tableName="T_SOURCE">
+            <column name="ID" type="int"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="FIRST_NAME" type="varchar(30)"/>
+            <column name="LAST_NAME" type="varchar(30)"/>
+            <column name="STATUS" type="varchar(20)"/>
+        </createTable>
+        <insert tableName="T_SOURCE">
+            <column name="ID" valueNumeric="1"/><column name="FIRST_NAME" value="Ada"/>
+            <column name="LAST_NAME" value="Lovelace"/><column name="STATUS" value="active"/>
+        </insert>
+        <rollback><dropTable tableName="T_SOURCE"/></rollback>
+    </changeSet>
+    <changeSet id="composition-alter" author="test">
+        <addLookupTable existingTableName="T_SOURCE" existingColumnName="STATUS"
+                newTableName="T_STATUS" newColumnName="STATUS" newColumnDataType="varchar(20)"
+                constraintName="FK_STATUS"/>
+        <mergeColumns tableName="T_SOURCE" column1Name="FIRST_NAME" column2Name="LAST_NAME"
+                finalColumnName="FULL_NAME" finalColumnType="varchar(70)" joinString=" "/>
+        <dropAllForeignKeyConstraints baseTableName="T_SOURCE"/>
+        <rollback>
+            <dropTable tableName="T_STATUS"/>
+            <addColumn tableName="T_SOURCE"><column name="FIRST_NAME" type="varchar(30)"/><column name="LAST_NAME" type="varchar(30)"/></addColumn>
+            <update tableName="T_SOURCE"><column name="FIRST_NAME" value="Ada"/><column name="LAST_NAME" value="Lovelace"/></update>
+            <dropColumn tableName="T_SOURCE" columnName="FULL_NAME"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

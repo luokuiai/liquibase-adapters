@@ -39,7 +39,7 @@ public class KingbaseMySqlTableSnapshotGenerator extends TableSnapshotGenerator 
                     || Table.class.isAssignableFrom(objectType))
                     ? PRIORITY_DATABASE + 1 : PRIORITY_NONE;
         }
-        return super.getPriority(objectType, database);
+        return PRIORITY_NONE;
     }
 
     @Override

@@ -26,6 +26,9 @@ public class DamengDatabase extends AbstractJdbcDatabase {
         setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
         sequenceNextValueFunction = "%s.NEXTVAL";
         sequenceCurrentValueFunction = "%s.CURRVAL";
+        unmodifiableDataTypes.addAll(Arrays.asList("bigint", "int", "integer", "smallint",
+                "tinyint", "bit", "boolean", "real", "double", "double precision", "date",
+                "blob", "clob", "nclob", "text"));
     }
 
     /**
@@ -124,6 +127,16 @@ public class DamengDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supportsDropTableCascadeConstraints() {
+        return true;
+    }
+
+    @Override
+    public boolean createsIndexesForForeignKeys() {
+        return true;
+    }
+
+    @Override
     public boolean supportsCatalogs() {
         // Liquibase 5.x discards schema names during standardization when the
         // catalog container is disabled. DM8 has no JDBC catalog qualification.
@@ -169,6 +182,11 @@ public class DamengDatabase extends AbstractJdbcDatabase {
     @Override
     public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy,
             String generationType, Boolean defaultOnNull) {
+        if ((generationType != null && !generationType.isBlank())
+                || Boolean.TRUE.equals(defaultOnNull)) {
+            throw new UnexpectedLiquibaseException(
+                    "DM8 IDENTITY does not support generationType or defaultOnNull=true");
+        }
         return "IDENTITY(" + (startWith == null ? BigInteger.ONE : startWith)
                 + ", " + (incrementBy == null ? BigInteger.ONE : incrementBy) + ")";
     }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="identity-setup" author="test">
+        <createTable tableName="T_IDENTITY">
+            <column name="ID" type="bigint" autoIncrement="true" startWith="10" incrementBy="2"/>
+            <column name="NAME" type="varchar(30)"/>
+        </createTable>
+        <createTable tableName="T_ADDED"><column name="NAME" type="varchar(30)"/></createTable>
+        <rollback><dropTable tableName="T_ADDED"/><dropTable tableName="T_IDENTITY"/></rollback>
+    </changeSet>
+    <changeSet id="identity-alter" author="test">
+        <addColumn tableName="T_ADDED"><column name="NEW_ID" type="bigint" autoIncrement="true" startWith="20" incrementBy="2"/></addColumn>
+        <insert tableName="T_IDENTITY"><column name="NAME" value="first"/></insert>
+        <insert tableName="T_IDENTITY"><column name="NAME" value="second"/></insert>
+        <insert tableName="T_ADDED"><column name="NAME" value="identity"/></insert>
+        <rollback>
+            <delete tableName="T_ADDED"/>
+            <dropColumn tableName="T_ADDED" columnName="NEW_ID"/>
+            <delete tableName="T_IDENTITY"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -1,6 +1,7 @@
 package com.luokuiai.liquibase.dameng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
@@ -44,6 +46,37 @@ class DamengContainerIntegrationTest {
     private static final String CHANGELOG = "db/changelog/dameng-test.xml";
     private static final DockerImageName IMAGE = DockerImageName.parse(
             System.getProperty("dameng.test.image", "cnxc/dm8:20251114-kylin"));
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 4, 7})
+    void runsDdlAndDmlChangeMatrix(int mode) throws Exception {
+        try (GenericContainer<?> container = dameng(mode)) {
+            container.start();
+            String url = "jdbc:dm://" + container.getHost() + ":"
+                    + container.getMappedPort(DM_PORT);
+            assertAll("DM8 mode " + mode, Stream.of(
+                    "columns", "constraints", "indexes", "sequences", "dml",
+                    "types", "comments", "identity", "load-data", "composition",
+                    "cascade", "quoted", "roundtrip")
+                    .map(feature -> () -> {
+                        try (Connection connection = DriverManager.getConnection(
+                                url, "SYSDBA", PASSWORD)) {
+                            String schema = "LB_" + feature.replace('-', '_').toUpperCase(
+                                    java.util.Locale.ROOT);
+                            execute(connection, "CREATE SCHEMA " + schema
+                                    + " AUTHORIZATION SYSDBA");
+                            execute(connection, "SET SCHEMA " + schema);
+                            DamengDatabase database = (DamengDatabase) DatabaseFactory.getInstance()
+                                    .findCorrectDatabaseImplementation(new JdbcConnection(connection));
+                            if ("roundtrip".equals(feature)) {
+                                DamengDiffAssertions.verify(connection, database);
+                            } else {
+                                DamengChangeAssertions.verify(feature, connection, database);
+                            }
+                        }
+                    }));
+        }
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {0, 4, 7})
@@ -137,6 +170,10 @@ class DamengContainerIntegrationTest {
         Table table = snapshot.get(new Table(null, "LB_APP", "LB_PROBE"));
         assertNotNull(table);
         assertEquals(4, table.getColumns().size());
+        Column id = table.getColumns().stream().filter(column -> "ID".equals(column.getName()))
+                .findFirst().orElseThrow();
+        assertEquals(10, id.getAutoIncrementInformation().getStartWith().intValue());
+        assertEquals(2, id.getAutoIncrementInformation().getIncrementBy().intValue());
         assertNotNull(table.getPrimaryKey());
         assertEquals("PK_LB_PROBE", table.getPrimaryKey().getName());
         assertTrue(table.getIndexes().stream().anyMatch(

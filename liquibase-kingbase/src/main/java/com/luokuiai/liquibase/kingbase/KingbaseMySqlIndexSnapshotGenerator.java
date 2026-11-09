@@ -42,7 +42,7 @@ public class KingbaseMySqlIndexSnapshotGenerator extends IndexSnapshotGenerator 
             }
             return PRIORITY_NONE;
         }
-        return super.getPriority(objectType, database);
+        return PRIORITY_NONE;
     }
 
     @Override

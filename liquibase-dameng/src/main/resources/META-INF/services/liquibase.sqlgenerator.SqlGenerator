@@ -1,1 +1,13 @@
 com.luokuiai.liquibase.dameng.DamengViewDefinitionGenerator
+com.luokuiai.liquibase.dameng.DamengModifyDataTypeGenerator
+com.luokuiai.liquibase.dameng.DamengSetNullableGenerator
+com.luokuiai.liquibase.dameng.DamengAddDefaultValueGenerator
+com.luokuiai.liquibase.dameng.DamengDropDefaultValueGenerator
+com.luokuiai.liquibase.dameng.DamengRenameTableGenerator
+com.luokuiai.liquibase.dameng.DamengSetTableRemarksGenerator
+com.luokuiai.liquibase.dameng.DamengSetColumnRemarksGenerator
+com.luokuiai.liquibase.dameng.DamengCreateSequenceGenerator
+com.luokuiai.liquibase.dameng.DamengAlterSequenceGenerator
+com.luokuiai.liquibase.dameng.DamengAddAutoIncrementGenerator
+com.luokuiai.liquibase.dameng.DamengInsertOrUpdateGenerator
+com.luokuiai.liquibase.dameng.DamengDropTableGenerator

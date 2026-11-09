@@ -1,2 +1,4 @@
 com.luokuiai.liquibase.dameng.DamengSequenceSnapshotGenerator
 com.luokuiai.liquibase.dameng.DamengUniqueConstraintSnapshotGenerator
+com.luokuiai.liquibase.dameng.DamengColumnSnapshotGenerator
+com.luokuiai.liquibase.dameng.DamengIndexSnapshotGenerator

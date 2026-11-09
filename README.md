@@ -236,15 +236,36 @@ To select another image with the same layout:
   -PdamengTestImage=registry/dm8:tested-version
 ```
 
-The integration suite covers modes 0, 4, and 7 with `CASE_SENSITIVE=1` and the
-default `DDL_AUTO_COMMIT=1`: automatic selection, history and lock tables,
-repeated update, structured table/index/view/sequence creation, boolean values,
-identity columns, JDBC metadata, preconditions, snapshots of tables, columns,
-primary keys, unique constraints, indexes, views, and sequences, lock contention,
-mode-specific includes, and explicit rollback.
+The integration suite exercises the same DDL/DML operation matrix in modes 0,
+4, and 7 with `CASE_SENSITIVE=1` and `DDL_AUTO_COMMIT=1`.
+It verifies persisted database state, repeated updates, rollback to
+the original structure and data, and final object removal. Coverage includes:
+
+| Area | Verified changes |
+| --- | --- |
+| Tables and columns | Create/drop tables, cascading constraint removal, rename tables/columns, add/drop columns, modify data types, add/drop defaults and named NOT NULL constraints |
+| Constraints and indexes | Add/drop primary, unique and foreign keys, update/delete cascades, composite and descending indexes, unique indexes, drop indexes |
+| Views and sequences | Create/replace/drop views; create/alter/drop sequences with increment, bounds, cache, cycle and ordering options |
+| DML and imports | Structured insert/update/delete, predicate parameters, Unicode and quoted strings, NULL, booleans, decimal/date/time values, BLOB file insertion, CSV load and MERGE-based loadUpdateData including onlyUpdate |
+| Types and identifiers | Numeric, character, binary, large-object, temporal and UUID mappings; reserved words and mixed-case quoted identifiers |
+| Comments | Table/column comments on creation and alteration, including added columns |
+| Metadata and diff | Table, column, primary/foreign/unique key, index, view and sequence snapshots; generate an XML changelog from a snapshot, replay it and compare the resulting schema |
+| Migration lifecycle | History and lock tables, two-connection lock contention, preconditions, mode-specific includes and explicit rollback |
+
+DM8 does not permit converting an existing ordinary column into an identity
+column. `addAutoIncrement` fails validation with guidance to use
+`createTable` or a new `addColumn` with `autoIncrement` instead. Creation and
+addition of identity columns support custom seeds and increments.
+Unsupported identity `generationType` / `defaultOnNull=true`, sequence
+`dataType`, and NOT NULL `validate=false` options are rejected explicitly.
+
+Handwritten SQL is executed as supplied. A compatibility-mode name does not
+translate arbitrary PostgreSQL/MySQL SQL or provide those databases' extensions.
+The directory filter is optional and does not control SQL generation.
 
 Identifier folding comes from JDBC metadata, and DDL transaction behavior is
 read from the active `DDL_AUTO_COMMIT` parameter. Other case-sensitivity,
 identifier, and DDL configurations require separate integration validation.
 Support for additional DM versions, driver versions, compatibility modes,
-advanced change types, and full schema diff is not implied by these tests.
+vendor-specific extensions, and diff of object types outside the matrix is not
+implied by these tests.

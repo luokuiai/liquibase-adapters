@@ -37,7 +37,7 @@ public class KingbaseMySqlViewSnapshotGenerator extends ViewSnapshotGenerator {
                     || View.class.isAssignableFrom(objectType))
                     ? PRIORITY_DATABASE + 1 : PRIORITY_NONE;
         }
-        return super.getPriority(objectType, database);
+        return PRIORITY_NONE;
     }
 
     @Override

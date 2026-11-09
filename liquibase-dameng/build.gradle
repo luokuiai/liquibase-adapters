@@ -15,6 +15,7 @@ dependencies {
     compileOnly "org.liquibase:liquibase-core:${rootProject.ext.liquibaseVersion}"
 
     testImplementation "org.liquibase:liquibase-core:${rootProject.ext.liquibaseVersion}"
+    testImplementation project(':liquibase-kingbase')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testImplementation 'org.mockito:mockito-core:5.20.0'
     testImplementation "org.testcontainers:testcontainers:${rootProject.ext.testcontainersVersion}"

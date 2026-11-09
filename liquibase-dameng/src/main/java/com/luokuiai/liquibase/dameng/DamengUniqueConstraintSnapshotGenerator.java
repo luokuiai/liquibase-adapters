@@ -40,7 +40,7 @@ public class DamengUniqueConstraintSnapshotGenerator extends UniqueConstraintSna
     protected List<CachedRow> listConstraints(Table table, DatabaseSnapshot snapshot,
             Schema schema) throws DatabaseException {
         List<Map<String, ?>> rows = query(snapshot.getDatabase(), """
-                SELECT CONSTRAINT_NAME
+                SELECT CONSTRAINT_NAME, INDEX_NAME, OWNER AS INDEX_SCHEMA
                   FROM ALL_CONSTRAINTS
                  WHERE OWNER = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'U'
                  ORDER BY CONSTRAINT_NAME

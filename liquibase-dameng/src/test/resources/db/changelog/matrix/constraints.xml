@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="constraints-setup" author="test">
+        <createTable tableName="T_PARENT">
+            <column name="ID" type="int"><constraints nullable="false"/></column>
+            <column name="TEMP_CODE" type="varchar(20)"/>
+        </createTable>
+        <createTable tableName="T_CHILD">
+            <column name="ID" type="int"><constraints nullable="false"/></column>
+            <column name="P_ID" type="int"/>
+            <column name="CODE" type="varchar(30)"/>
+            <column name="SECOND_CODE" type="varchar(30)"/>
+        </createTable>
+        <rollback><dropTable tableName="T_CHILD"/><dropTable tableName="T_PARENT"/></rollback>
+    </changeSet>
+    <changeSet id="constraints-alter" author="test">
+        <addPrimaryKey tableName="T_PARENT" columnNames="ID" constraintName="PK_PARENT"/>
+        <addPrimaryKey tableName="T_CHILD" columnNames="ID" constraintName="PK_CHILD"/>
+        <addUniqueConstraint tableName="T_CHILD" columnNames="CODE,SECOND_CODE" constraintName="UK_CHILD"/>
+        <addForeignKeyConstraint baseTableName="T_CHILD" baseColumnNames="P_ID"
+                referencedTableName="T_PARENT" referencedColumnNames="ID"
+                constraintName="FK_TEMP"/>
+        <dropForeignKeyConstraint baseTableName="T_CHILD" constraintName="FK_TEMP"/>
+        <addUniqueConstraint tableName="T_PARENT" columnNames="TEMP_CODE" constraintName="UK_TEMP"/>
+        <dropUniqueConstraint tableName="T_PARENT" constraintName="UK_TEMP"/>
+        <dropPrimaryKey tableName="T_PARENT" constraintName="PK_PARENT"/>
+        <addPrimaryKey tableName="T_PARENT" columnNames="ID" constraintName="PK_PARENT"/>
+        <addForeignKeyConstraint baseTableName="T_CHILD" baseColumnNames="P_ID"
+                referencedTableName="T_PARENT" referencedColumnNames="ID"
+                constraintName="FK_CHILD" onDelete="CASCADE" onUpdate="CASCADE"/>
+        <insert tableName="T_PARENT"><column name="ID" valueNumeric="1"/></insert>
+        <insert tableName="T_PARENT"><column name="ID" valueNumeric="2"/></insert>
+        <insert tableName="T_CHILD"><column name="ID" valueNumeric="1"/><column name="P_ID" valueNumeric="1"/></insert>
+        <insert tableName="T_CHILD"><column name="ID" valueNumeric="2"/><column name="P_ID" valueNumeric="2"/></insert>
+        <update tableName="T_PARENT"><column name="ID" valueNumeric="3"/><where>ID = 1</where></update>
+        <delete tableName="T_PARENT"><where>ID = 2</where></delete>
+        <rollback>
+            <delete tableName="T_CHILD"/>
+            <delete tableName="T_PARENT"/>
+            <dropForeignKeyConstraint baseTableName="T_CHILD" constraintName="FK_CHILD"/>
+            <dropUniqueConstraint tableName="T_CHILD" constraintName="UK_CHILD"/>
+            <dropPrimaryKey tableName="T_CHILD" constraintName="PK_CHILD"/>
+            <dropPrimaryKey tableName="T_PARENT" constraintName="PK_PARENT"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

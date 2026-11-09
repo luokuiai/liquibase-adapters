@@ -94,6 +94,8 @@ class DamengDatabaseTest {
         DamengDatabase database = new DamengDatabase();
         database.setDefaultSchemaName("app");
         assertTrue(database.supportsSchemas());
+        assertTrue(database.createsIndexesForForeignKeys());
+        assertTrue(database.supportsDropTableCascadeConstraints());
         assertNull(database.getJdbcCatalogName(database.getDefaultSchema()));
         assertFalse(database.supportsCatalogInObjectName(Table.class));
         assertEquals("APP", database.getDefaultSchemaName());
