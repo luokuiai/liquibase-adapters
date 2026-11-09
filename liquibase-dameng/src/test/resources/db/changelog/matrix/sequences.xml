@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="sequences-setup" author="test">
+        <createSequence sequenceName="S_MATRIX" startValue="10" incrementBy="2"
+                minValue="1" maxValue="1000" cacheSize="8" cycle="false" ordered="false"/>
+        <createView viewName="V_MATRIX">SELECT 1 AS MARKER</createView>
+        <rollback><dropView viewName="V_MATRIX"/><dropSequence sequenceName="S_MATRIX"/></rollback>
+    </changeSet>
+    <changeSet id="sequences-alter" author="test">
+        <alterSequence sequenceName="S_MATRIX" incrementBy="3" minValue="1"
+                maxValue="1000" cacheSize="0" cycle="true" ordered="true"/>
+        <createView viewName="V_MATRIX" replaceIfExists="true">SELECT 2 AS MARKER</createView>
+        <rollback>
+            <createView viewName="V_MATRIX" replaceIfExists="true">SELECT 1 AS MARKER</createView>
+            <alterSequence sequenceName="S_MATRIX" incrementBy="2" minValue="1"
+                    maxValue="1000" cacheSize="8" cycle="false" ordered="false"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

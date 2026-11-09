@@ -7,7 +7,8 @@
 - Preserve the distinction between SQL dialect behavior and physical metadata
   behavior. A compatibility mode may reuse a Liquibase dialect while requiring
   dedicated metadata snapshot support.
-- Keep support scoped to the documented KingbaseES V8 compatibility modes.
+- Keep support scoped to the documented KingbaseES V8 compatibility modes and
+  DM8 compatibility modes 0, 4, and 7.
   Do not claim support for an untested database version, driver, or mode.
 
 ## Development
@@ -17,7 +18,8 @@
   reflection, patches to third-party libraries, or application-side workarounds.
 - Add a focused test for every behavior change. Use unit tests for adapter
   selection and SPI registration, and V8 Testcontainers integration tests for
-  JDBC metadata, update, rollback, and snapshot behavior.
+  JDBC metadata, update, rollback, and snapshot behavior. Use DM8 Testcontainers
+  integration tests for the corresponding Dameng behaviors.
 - Keep changelog fixtures minimal and include explicit rollback where relevant.
 - Avoid unrelated refactors and do not commit local tooling directories such as
   `.codex/`, build output, credentials, or generated artifacts.
@@ -25,8 +27,11 @@
 ## Verification
 
 - Run `./gradlew :liquibase-kingbase:test` for unit changes.
+- Run `./gradlew :liquibase-dameng:test` for Dameng unit changes.
 - Run `./gradlew :liquibase-kingbase:integrationTest` when changing database
   detection, SQL generation, JDBC metadata, snapshots, or changelog behavior.
+- Run `./gradlew :liquibase-dameng:integrationTest` for the corresponding Dameng
+  changes; cover compatibility modes 0, 4, and 7.
 - Before committing, run `git diff --check` and review the staged diff.
 
 ## Git
@@ -55,8 +60,8 @@ branches, tag, and Maven Central publication stay aligned.
 - Use an annotated tag named `v<VERSION>`. Never use a lightweight tag.
 - Never move, replace, or force-push a published tag.
 - Push only the release tag, not every local tag.
-- The workflow publishes `liquibase-kingbase` to Maven Central; it does not
-  create a GitHub Release.
+- The workflow publishes `liquibase-kingbase` and `liquibase-dameng` to Maven
+  Central; it does not create a GitHub Release.
 
 The examples below use `1.0.0`. Replace it consistently for each release.
 
@@ -82,6 +87,8 @@ Run the full release gate on the release branch:
 ```bash
 ./gradlew :liquibase-kingbase:clean :liquibase-kingbase:test
 ./gradlew :liquibase-kingbase:integrationTest
+./gradlew :liquibase-dameng:clean :liquibase-dameng:test
+./gradlew :liquibase-dameng:integrationTest
 ./gradlew properties -q -PreleaseVersion=1.0.0 | grep '^version: 1.0.0$'
 git diff --check
 ```

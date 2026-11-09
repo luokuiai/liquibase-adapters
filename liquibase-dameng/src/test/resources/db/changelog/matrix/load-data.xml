@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="load-setup" author="test">
+        <createTable tableName="T_LOAD">
+            <column name="ID" type="int"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="NAME" type="varchar(100)"/><column name="ACTIVE" type="boolean"/>
+        </createTable>
+        <createTable tableName="T_ONLY_UPDATE">
+            <column name="ID" type="int"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="NAME" type="varchar(100)"/><column name="ACTIVE" type="boolean"/>
+        </createTable>
+        <createTable tableName="T_COMPOSITE">
+            <column name="ID" type="int"><constraints nullable="false"/></column>
+            <column name="CODE" type="varchar(40)"><constraints nullable="false"/></column>
+            <column name="NAME" type="varchar(40)"/>
+        </createTable>
+        <addPrimaryKey tableName="T_COMPOSITE" columnNames="ID,CODE" constraintName="PK_COMPOSITE"/>
+        <createTable tableName="T_KEY_ONLY">
+            <column name="ID" type="int"><constraints primaryKey="true" nullable="false"/></column>
+        </createTable>
+        <loadData tableName="T_LOAD" file="initial.csv" relativeToChangelogFile="true" encoding="UTF-8">
+            <column header="ID" type="NUMERIC"/><column header="NAME" type="STRING"/><column header="ACTIVE" type="BOOLEAN"/>
+        </loadData>
+        <insert tableName="T_ONLY_UPDATE"><column name="ID" valueNumeric="1"/><column name="NAME" value="initial"/></insert>
+        <insert tableName="T_COMPOSITE"><column name="ID" valueNumeric="1"/><column name="CODE" value="O'Brien"/><column name="NAME" value="initial"/></insert>
+        <insert tableName="T_KEY_ONLY"><column name="ID" valueNumeric="1"/></insert>
+        <rollback>
+            <dropTable tableName="T_KEY_ONLY"/><dropTable tableName="T_COMPOSITE"/>
+            <dropTable tableName="T_ONLY_UPDATE"/><dropTable tableName="T_LOAD"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="load-alter" author="test">
+        <loadUpdateData tableName="T_LOAD" primaryKey="ID" file="updated.csv" relativeToChangelogFile="true" encoding="UTF-8">
+            <column header="ID" type="NUMERIC"/><column header="NAME" type="STRING"/><column header="ACTIVE" type="BOOLEAN"/>
+        </loadUpdateData>
+        <loadUpdateData tableName="T_ONLY_UPDATE" primaryKey="ID" onlyUpdate="true" file="only-update.csv" relativeToChangelogFile="true" encoding="UTF-8">
+            <column header="ID" type="NUMERIC"/><column header="NAME" type="STRING"/><column header="ACTIVE" type="BOOLEAN"/>
+        </loadUpdateData>
+        <loadUpdateData tableName="T_COMPOSITE" primaryKey="ID,CODE" file="composite.csv" relativeToChangelogFile="true" encoding="UTF-8">
+            <column header="ID" type="NUMERIC"/><column header="CODE" type="STRING"/><column header="NAME" type="STRING"/>
+        </loadUpdateData>
+        <loadUpdateData tableName="T_KEY_ONLY" primaryKey="ID" file="keys.csv" relativeToChangelogFile="true">
+            <column header="ID" type="NUMERIC"/>
+        </loadUpdateData>
+        <rollback>
+            <delete tableName="T_KEY_ONLY"><where>ID = 2</where></delete>
+            <delete tableName="T_COMPOSITE"><where>ID = 2</where></delete>
+            <update tableName="T_COMPOSITE"><column name="NAME" value="initial"/><where>ID = 1</where></update>
+            <delete tableName="T_LOAD"><where>ID = 3</where></delete>
+            <update tableName="T_LOAD"><column name="NAME" value="初始 O'Brien"/><where>ID = 1</where></update>
+            <update tableName="T_ONLY_UPDATE"><column name="NAME" value="initial"/><column name="ACTIVE" valueComputed="NULL"/></update>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

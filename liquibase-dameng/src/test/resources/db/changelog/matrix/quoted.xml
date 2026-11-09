@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" objectQuotingStrategy="QUOTE_ALL_OBJECTS"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="quoted-setup" author="test">
+        <createTable tableName="Order">
+            <column name="Id" type="int"><constraints primaryKey="true" nullable="false" primaryKeyName="Pk_Order"/></column>
+            <column name="select" type="varchar(20)" defaultValue="old"/>
+        </createTable>
+        <insert tableName="Order"><column name="Id" valueNumeric="1"/><column name="select" value="quoted"/></insert>
+        <rollback><dropTable tableName="Order"/></rollback>
+    </changeSet>
+    <changeSet id="quoted-alter" author="test">
+        <modifyDataType tableName="Order" columnName="select" newDataType="varchar(80)"/>
+        <renameColumn tableName="Order" oldColumnName="select" newColumnName="Value" columnDataType="varchar(80)"/>
+        <addDefaultValue tableName="Order" columnName="Value" columnDataType="varchar(80)" defaultValue="new"/>
+        <createIndex tableName="Order" indexName="Ix_Order"><column name="Value"/></createIndex>
+        <setColumnRemarks tableName="Order" columnName="Value" remarks="quoted column"/>
+        <renameTable oldTableName="Order" newTableName="OrderRenamed"/>
+        <rollback>
+            <renameTable oldTableName="OrderRenamed" newTableName="Order"/>
+            <dropIndex tableName="Order" indexName="Ix_Order"/>
+            <addDefaultValue tableName="Order" columnName="Value" columnDataType="varchar(80)" defaultValue="old"/>
+            <renameColumn tableName="Order" oldColumnName="Value" newColumnName="select" columnDataType="varchar(80)"/>
+            <modifyDataType tableName="Order" columnName="select" newDataType="varchar(20)"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

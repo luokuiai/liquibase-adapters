@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="comments-setup" author="test">
+        <createTable tableName="T_COMMENTS" remarks="original table">
+            <column name="ID" type="int" remarks="original column"/>
+        </createTable>
+        <rollback><dropTable tableName="T_COMMENTS"/></rollback>
+    </changeSet>
+    <changeSet id="comments-alter" author="test">
+        <setTableRemarks tableName="T_COMMENTS" remarks="业务 O'Brien"/>
+        <setColumnRemarks tableName="T_COMMENTS" columnName="ID" remarks="字段 O'Brien"/>
+        <addColumn tableName="T_COMMENTS"><column name="EXTRA" type="int" remarks="added column"/></addColumn>
+        <rollback>
+            <dropColumn tableName="T_COMMENTS" columnName="EXTRA"/>
+            <setColumnRemarks tableName="T_COMMENTS" columnName="ID" remarks="original column"/>
+            <setTableRemarks tableName="T_COMMENTS" remarks="original table"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

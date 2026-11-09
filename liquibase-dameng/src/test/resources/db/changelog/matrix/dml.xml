@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="dml-setup" author="test">
+        <createTable tableName="T_DATA">
+            <column name="ID" type="bigint"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="NAME" type="varchar(100)"/>
+            <column name="ACTIVE" type="boolean"/>
+            <column name="AMOUNT" type="decimal(12,2)"/>
+            <column name="OPTIONAL_VALUE" type="varchar(30)"/>
+            <column name="CREATED_AT" type="datetime"/>
+        </createTable>
+        <insert tableName="T_DATA"><column name="ID" valueNumeric="1"/><column name="NAME" value="initial"/></insert>
+        <insert tableName="T_DATA"><column name="ID" valueNumeric="2"/><column name="NAME" value="delete me"/></insert>
+        <rollback><dropTable tableName="T_DATA"/></rollback>
+    </changeSet>
+    <changeSet id="dml-alter" author="test">
+        <insert tableName="T_DATA">
+            <column name="ID" valueNumeric="3"/><column name="NAME" value="新增 O'Brien"/>
+            <column name="ACTIVE" valueBoolean="false"/><column name="AMOUNT" valueNumeric="12.50"/>
+            <column name="OPTIONAL_VALUE" valueComputed="NULL"/>
+            <column name="CREATED_AT" valueDate="2026-01-02T03:04:05"/>
+        </insert>
+        <update tableName="T_DATA">
+            <column name="NAME" value="更新 O'Brien"/><column name="ACTIVE" valueBoolean="true"/>
+            <where>:name = :value</where><whereParams><param name="ID" valueNumeric="1"/></whereParams>
+        </update>
+        <delete tableName="T_DATA">
+            <where>:name = :value</where><whereParams><param name="ID" valueNumeric="2"/></whereParams>
+        </delete>
+        <rollback>
+            <delete tableName="T_DATA"><where>ID = 3</where></delete>
+            <update tableName="T_DATA"><column name="NAME" value="initial"/><column name="ACTIVE" valueComputed="NULL"/><where>ID = 1</where></update>
+            <insert tableName="T_DATA"><column name="ID" valueNumeric="2"/><column name="NAME" value="delete me"/></insert>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

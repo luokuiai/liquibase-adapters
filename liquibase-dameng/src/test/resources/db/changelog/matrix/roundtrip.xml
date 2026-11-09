@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <include file="types.xml" relativeToChangelogFile="true"/>
+    <changeSet id="roundtrip-setup" author="test">
+        <createSequence sequenceName="S_ROUNDTRIP" startValue="10" incrementBy="2" cacheSize="8" cycle="false" ordered="false"/>
+        <createTable tableName="T_REF" remarks="reference table">
+            <column name="ID" type="bigint" autoIncrement="true" startWith="10" incrementBy="2">
+                <constraints primaryKey="true" primaryKeyName="PK_REF" nullable="false"/>
+            </column>
+            <column name="NAME" type="varchar(80)" remarks="reference name"><constraints nullable="false"/></column>
+            <column name="ACTIVE" type="boolean" defaultValueBoolean="true"/>
+            <column name="CREATED_AT" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addUniqueConstraint tableName="T_REF" columnNames="NAME,ACTIVE" constraintName="UK_REF"/>
+        <createIndex tableName="T_REF" indexName="IX_REF_NAME"><column name="NAME" descending="true"/></createIndex>
+        <createTable tableName="T_DETAIL">
+            <column name="ID" type="bigint"><constraints primaryKey="true" primaryKeyName="PK_DETAIL" nullable="false"/></column>
+            <column name="REF_ID" type="bigint"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="T_DETAIL" baseColumnNames="REF_ID"
+                referencedTableName="T_REF" referencedColumnNames="ID" constraintName="FK_DETAIL" onDelete="CASCADE"/>
+        <createView viewName="V_ROUNDTRIP">SELECT ID, NAME FROM T_REF</createView>
+        <rollback>
+            <dropView viewName="V_ROUNDTRIP"/><dropTable tableName="T_DETAIL"/>
+            <dropTable tableName="T_REF"/><dropSequence sequenceName="S_ROUNDTRIP"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

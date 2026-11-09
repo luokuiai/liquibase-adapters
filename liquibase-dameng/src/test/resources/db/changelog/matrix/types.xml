@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="types-setup" author="test">
+        <createTable tableName="T_TYPES">
+            <column name="C_INT" type="int"/><column name="C_BIGINT" type="bigint"/>
+            <column name="C_SMALLINT" type="smallint"/><column name="C_TINYINT" type="tinyint"/>
+            <column name="C_FLOAT" type="float"/><column name="C_DOUBLE" type="double"/>
+            <column name="C_REAL" type="real"/><column name="C_DECIMAL" type="decimal(18,4)"/>
+            <column name="C_NUMERIC" type="numeric(18,4)"/><column name="C_BOOLEAN" type="boolean"/>
+            <column name="C_CHAR" type="char(8)"/><column name="C_VARCHAR" type="varchar(100)"/>
+            <column name="C_NVARCHAR" type="nvarchar(100)"/><column name="C_CLOB" type="clob"/>
+            <column name="C_BLOB" type="blob"/><column name="C_VARBINARY" type="varbinary(32)"/>
+            <column name="C_BINARY" type="binary(16)"/><column name="C_DATE" type="date"/>
+            <column name="C_TIME" type="time"/><column name="C_DATETIME" type="datetime"/>
+            <column name="C_TIMESTAMP" type="timestamp"/><column name="C_UUID" type="uuid"/>
+            <column name="C_TIME_FRACTION" type="time(3)"/>
+            <column name="C_TIMESTAMP_FRACTION" type="timestamp(3)"/>
+            <column name="C_TIMESTAMP_ZONE" type="timestamp(3) with time zone"/>
+        </createTable>
+        <insert tableName="T_TYPES">
+            <column name="C_INT" valueNumeric="1"/><column name="C_BIGINT" valueNumeric="9000000000"/>
+            <column name="C_SMALLINT" valueNumeric="2"/><column name="C_TINYINT" valueNumeric="3"/>
+            <column name="C_FLOAT" valueNumeric="1.5"/><column name="C_DOUBLE" valueNumeric="2.5"/>
+            <column name="C_REAL" valueNumeric="3.5"/><column name="C_DECIMAL" valueNumeric="123.4567"/>
+            <column name="C_NUMERIC" valueNumeric="987.6543"/><column name="C_BOOLEAN" valueBoolean="true"/>
+            <column name="C_CHAR" value="fixed"/><column name="C_VARCHAR" value="你好 O'Brien"/>
+            <column name="C_NVARCHAR" value="中文"/><column name="C_CLOB" value="长文本 O'Brien"/>
+            <column name="C_BLOB" valueBlobFile="blob.txt"/>
+            <column name="C_VARBINARY" valueComputed="HEXTORAW('010203')"/>
+            <column name="C_BINARY" valueComputed="HEXTORAW('010203')"/>
+            <column name="C_DATE" valueDate="2026-01-02"/>
+            <column name="C_TIME" valueDate="03:04:05"/>
+            <column name="C_DATETIME" valueDate="2026-01-02T03:04:05"/>
+            <column name="C_TIMESTAMP" valueDate="2026-01-02T03:04:05"/>
+            <column name="C_UUID" value="123e4567-e89b-12d3-a456-426614174000"/>
+        </insert>
+        <rollback><dropTable tableName="T_TYPES"/></rollback>
+    </changeSet>
+    <changeSet id="types-alter" author="test">
+        <update tableName="T_TYPES"><column name="C_BOOLEAN" valueBoolean="false"/></update>
+        <rollback><update tableName="T_TYPES"><column name="C_BOOLEAN" valueBoolean="true"/></update></rollback>
+    </changeSet>
+</databaseChangeLog>

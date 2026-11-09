@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+    <changeSet id="columns-setup" author="test">
+        <createTable tableName="T_COLUMNS">
+            <column name="ID" type="int"><constraints nullable="false"/></column>
+            <column name="NAME" type="varchar(20)" defaultValue="old"/>
+            <column name="EXTRA" type="varchar(10)"/>
+        </createTable>
+        <insert tableName="T_COLUMNS"><column name="ID" valueNumeric="1"/><column name="NAME" valueComputed="NULL"/></insert>
+        <rollback><dropTable tableName="T_COLUMNS"/></rollback>
+    </changeSet>
+    <changeSet id="columns-alter" author="test">
+        <addColumn tableName="T_COLUMNS">
+            <column name="FLAG" type="boolean" defaultValueBoolean="true"/>
+        </addColumn>
+        <modifyDataType tableName="T_COLUMNS" columnName="NAME" newDataType="varchar(80)"/>
+        <dropDefaultValue tableName="T_COLUMNS" columnName="NAME" columnDataType="varchar(80)"/>
+        <addDefaultValue tableName="T_COLUMNS" columnName="NAME" columnDataType="varchar(80)" defaultValue="new"/>
+        <dropNotNullConstraint tableName="T_COLUMNS" columnName="ID" columnDataType="int"/>
+        <addNotNullConstraint tableName="T_COLUMNS" columnName="NAME" columnDataType="varchar(80)"
+                constraintName="NN_NAME" defaultNullValue="filled"/>
+        <dropColumn tableName="T_COLUMNS" columnName="EXTRA"/>
+        <renameColumn tableName="T_COLUMNS" oldColumnName="NAME" newColumnName="LABEL" columnDataType="varchar(80)"/>
+        <renameTable oldTableName="T_COLUMNS" newTableName="T_RENAMED"/>
+        <rollback>
+            <renameTable oldTableName="T_RENAMED" newTableName="T_COLUMNS"/>
+            <renameColumn tableName="T_COLUMNS" oldColumnName="LABEL" newColumnName="NAME" columnDataType="varchar(80)"/>
+            <addColumn tableName="T_COLUMNS"><column name="EXTRA" type="varchar(10)"/></addColumn>
+            <dropNotNullConstraint tableName="T_COLUMNS" columnName="NAME" columnDataType="varchar(80)"/>
+            <update tableName="T_COLUMNS"><column name="NAME" valueComputed="NULL"/><where>ID = 1</where></update>
+            <addNotNullConstraint tableName="T_COLUMNS" columnName="ID" columnDataType="int"/>
+            <dropDefaultValue tableName="T_COLUMNS" columnName="NAME" columnDataType="varchar(80)"/>
+            <addDefaultValue tableName="T_COLUMNS" columnName="NAME" columnDataType="varchar(80)" defaultValue="old"/>
+            <modifyDataType tableName="T_COLUMNS" columnName="NAME" newDataType="varchar(20)"/>
+            <dropColumn tableName="T_COLUMNS" columnName="FLAG"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
